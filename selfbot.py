@@ -26,7 +26,7 @@ server_thread = threading.Thread(target=start_server, daemon=True)
 server_thread.start()
 
 # ----------------- 2. DISCORD AUTO-POSTER LOGIC ----------------- #
-USER_TOKEN = "MTU1NzY5NzY1OTYzNTI0MDk2Mg.Gt-jEu.tueOqiIngORCEtrcuyiIVg5q_L5aDzdzvJBN7A"
+USER_TOKEN ="MTU1NzY5NzY1OTYzNTI0MDk2Mg.Gt-jEu.tueOqiIngORCEtrcuyiIVg5q_L5aDzdzvJBN7A"
 CHANNEL_ID = "1410924658840178738"
 
 paragraphs = [
