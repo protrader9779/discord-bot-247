@@ -2,25 +2,30 @@ import time
 import random
 import requests
 import os
-from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
-# Render deployment ke liye dynamic PORT handle karne wala HTTP server
+# ----------------- 1. DUMMY HTTP SERVER FOR RENDER ----------------- #
 class SimpleHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
+        self.send_header('Content-type', 'text/html')
         self.end_headers()
         self.wfile.write(b"Bot is Running 24/7!")
 
-def run_dummy_server():
+    def log_message(self, format, *args):
+        return  # Render logs clean rakhne ke liye HTTP logs disable kiye hain
+
+def start_server():
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(('0.0.0.0', port), SimpleHandler)
     server.serve_forever()
 
-threading.Thread(target=run_dummy_server, daemon=True).start()
+# Background me Web Server start karein
+server_thread = threading.Thread(target=start_server, daemon=True)
+server_thread.start()
 
-# ----------------- Discord Bot Code ----------------- #
-
+# ----------------- 2. DISCORD AUTO-POSTER LOGIC ----------------- #
 USER_TOKEN = "MTU1MDgwMDQwNDI2MDk3ODc0OQ.GJNn7p.fAsB0TqLqKLkaAnLmqM_fczFZOVxdKYcbp1eM4"
 CHANNEL_ID = "1410924658840178738"
 
@@ -37,7 +42,6 @@ paragraphs = [
 ]
 
 url = f"https://discord.com/api/v9/channels/{CHANNEL_ID}/messages"
-
 headers = {
     "Authorization": USER_TOKEN,
     "Content-Type": "application/json"
@@ -47,14 +51,15 @@ available_paragraphs = paragraphs.copy()
 random.shuffle(available_paragraphs)
 msg_count = 0
 
-print("[+] Secondary Account Auto-Poster Started!")
+print("[+] Secondary Account Auto-Poster Started!", flush=True)
 
+# App start hote hi pehla message turant bhejne ke liye
 while True:
     try:
         if not available_paragraphs:
             available_paragraphs = paragraphs.copy()
             random.shuffle(available_paragraphs)
-            print("[INFO] Reshuffled paragraphs.")
+            print("[INFO] Reshuffled paragraphs.", flush=True)
 
         message = available_paragraphs.pop()
         data = {"content": message}
@@ -63,20 +68,20 @@ while True:
 
         if response.status_code in (200, 201):
             msg_count += 1
-            print(f"[{time.strftime('%H:%M:%S')}] Message #{msg_count} Sent Successfully!")
+            print(f"[{time.strftime('%H:%M:%S')}] Message #{msg_count} Sent Successfully!", flush=True)
             wait_time = random.randint(305, 320)
-            print(f"[WAIT] Next message in {wait_time // 60} minutes ({wait_time} seconds)...")
+            print(f"[WAIT] Next message in {wait_time // 60} minutes ({wait_time} seconds)...", flush=True)
             time.sleep(wait_time)
 
         elif response.status_code == 429:
             retry_after = response.json().get("retry_after", 120)
-            print(f"[RATE LIMIT] Waiting for {retry_after} seconds...")
+            print(f"[RATE LIMIT] Waiting for {retry_after} seconds...", flush=True)
             time.sleep(retry_after + 5)
 
         else:
-            print(f"[ERROR] Failed. Code: {response.status_code}, Response: {response.text}")
+            print(f"[ERROR] Failed. Code: {response.status_code}, Response: {response.text}", flush=True)
             time.sleep(15)
 
     except Exception as e:
-        print(f"[EXCEPTION] Error: {e}")
+        print(f"[EXCEPTION] Error: {e}", flush=True)
         time.sleep(15)
