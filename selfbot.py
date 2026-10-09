@@ -1,11 +1,27 @@
 import time
 import random
 import requests
+import os
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import threading
 
-# 1. Alt Account ka Fresh User Token (Network Tab se Copy Kiya Hua)
-USER_TOKEN = "MTU1NzY5NzY1OTYzNTI0MDk2Mg.G1Axrt.yohF_tqIhTXmTbyHTHIKkUvmcrdR7o8lehUH8A"
+# Render deployment ke liye dynamic PORT handle karne wala HTTP server
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is Running 24/7!")
 
-# 2. Goat Funded Trader ke Mini-Game Channel ki ID
+def run_dummy_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(('0.0.0.0', port), SimpleHandler)
+    server.serve_forever()
+
+threading.Thread(target=run_dummy_server, daemon=True).start()
+
+# ----------------- Discord Bot Code ----------------- #
+
+USER_TOKEN = "MTU1MDgwMDQwNDI2MDk3ODc0OQ.GJNn7p.fAsB0TqLqKLkaAnLmqM_fczFZOVxdKYcbp1eM4"
 CHANNEL_ID = "1410924658840178738"
 
 paragraphs = [
@@ -22,7 +38,6 @@ paragraphs = [
 
 url = f"https://discord.com/api/v9/channels/{CHANNEL_ID}/messages"
 
-# Note: User Token ke saath "Bot " nahi lagaya jata
 headers = {
     "Authorization": USER_TOKEN,
     "Content-Type": "application/json"
@@ -49,8 +64,6 @@ while True:
         if response.status_code in (200, 201):
             msg_count += 1
             print(f"[{time.strftime('%H:%M:%S')}] Message #{msg_count} Sent Successfully!")
-            
-            # Anti-Ban Safety Delay: Random gap between 360 to 600 seconds (6 to 10 mins)
             wait_time = random.randint(305, 320)
             print(f"[WAIT] Next message in {wait_time // 60} minutes ({wait_time} seconds)...")
             time.sleep(wait_time)
