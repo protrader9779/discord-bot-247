@@ -3,7 +3,7 @@ import time
 import random
 
 # Discord Token aur Channel ID Yahan Dalein
-TOKEN = "YOUR_DISCORD_TOKEN_HERE"
+USER_TOKEN = os.environ.get("USER_TOKEN")
 CHANNEL_ID = "1216836991942135859"  # games-chat channel ID
 
 # Trading related quotes aur messages ki list
